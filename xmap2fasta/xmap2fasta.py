@@ -1,17 +1,15 @@
 import sys
 from operator import itemgetter
-#first argument: the xmap file
-#second argument: the reference fasta
-#third argument: reference contig id conversion file(visit the read me for more detail)
+import argparse
 
 #return complementary sequence
 def reverse_comp(sequence):
-    complementary=""
+    complementary=[]
     reverse_dictionary={"A":"T","a":"t","T":"A","t":"a","G":"C","g":"c","C":"G","c":"g","N":"N","n":"n"}
     for i in range(0,len(sequence)):
-        complementary += reverse_dictionary[ sequence[len(sequence)-1-i] ]
+        complementary.append( reverse_dictionary[ sequence[len(sequence)-1-i] ] )
 
-    return complementary
+    return "".join(complementary)
 
 def load_fasta(fafile):
     sequence={}
@@ -53,19 +51,27 @@ def load_xmap(xmapfile,contig_conversion):
 
     return query_contigs
 
+
+
+parser = argparse.ArgumentParser("""xmap2vcf: a script used to convert xmap to fasta""")
+parser.add_argument('--conversion_table', type=str, help="The contig id conversion file, used to convert the xmap id to those of the fasta file")
+parser.add_argument('--fa', type=str, help="The reference fasta",required=True)
+parser.add_argument('--xmap', type=str, help="The xmap file",required=True)
+args= parser.parse_args()
+
 #read the reference
-reference_dictionary,chromosomes=load_fasta(sys.argv[2])
+reference_dictionary,chromosomes=load_fasta(args.fa)
 
 #read the reference contig conversion file
 contig_coversion={}
-if len(sys.argv) == 4:
-    for line in open(sys.argv[3]):
+if args.conversion_table:
+    for line in open(args.conversion_table):
         content=line.strip().split("=")
         contig_coversion[content[0]]=content[1]
 
 
 #read the xmap file and store all the alignments
-query_contigs=load_xmap(sys.argv[1],contig_coversion)
+query_contigs=load_xmap(args.xmap,contig_coversion)
 
 
 print_unsplit=False
