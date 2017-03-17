@@ -57,6 +57,10 @@ parser = argparse.ArgumentParser("""xmap2vcf: a script used to convert xmap to f
 parser.add_argument('--conversion_table', type=str, help="The contig id conversion file, used to convert the xmap id to those of the fasta file")
 parser.add_argument('--fa', type=str, help="The reference fasta",required=True)
 parser.add_argument('--xmap', type=str, help="The xmap file",required=True)
+parser.add_argument('--min_aligned_len', type=int,default=10000, help="alignments shorter than this length will not be printed(default = 10000 bp) ")
+parser.add_argument('--max_overlap', type=int,default=100000, help="the maximum overlap of split queries")
+parser.add_argument('--print_unsplit'       , help="print unsplit alignments to fasta",action="store_true")
+
 args= parser.parse_args()
 
 #read the reference
@@ -74,9 +78,9 @@ if args.conversion_table:
 query_contigs=load_xmap(args.xmap,contig_coversion)
 
 
-print_unsplit=False
-max_overlap=100000
-min_aligned_len=10000
+print_unsplit=args.print_unsplit
+max_overlap=args.max_overlap
+min_aligned_len=args.min_aligned_len
 #print alignments in fasta format
 for contig in query_contigs:
     if len(query_contigs[contig]) ==1 and print_unsplit:
